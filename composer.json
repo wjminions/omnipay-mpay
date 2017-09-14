@@ -1,0 +1,31 @@
+{
+  "name": "wjminions/omnipay-mpay",
+  "type": "library",
+  "description": "Mpay gateway for Omnipay payment processing library",
+  "keywords": [
+    "mpay",
+    "gateway",
+    "merchant",
+    "omnipay",
+    "pay",
+    "payment",
+    "purchase"
+  ],
+  "homepage": "https://github.com/wjminons/omnipay-mpay",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "wjminions",
+      "email": "wjminions@gmail.com",
+      "homepage": "https://github.com/wjminions/omnipay-mpay"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Omnipay\\Mpay\\": "src/"
+    }
+  },
+  "require": {
+    "omnipay/common": "~2.0"
+  }
+}
