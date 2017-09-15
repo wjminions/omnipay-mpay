@@ -83,30 +83,25 @@ class MobiPurchaseResponse extends AbstractResponse implements RedirectResponseI
         $html = <<<eot
 <html>
 <head></head>
-<body>
-<form name="form1" method="post" action="<? echo "$gateway" ?>">
-	<input type="hidden" name="merchantid" value="<? echo "$merchantid" ?>" />
-	<input type="hidden" name="merchant_tid" value="<? echo "$merchant_tid" ?>" />
-	<input type="hidden" name="ordernum" value="<? echo "$ordernum" ?>" />
-	<input type="hidden" name="datetime" value="<? echo "$datetime" ?>" />
-	<input type="hidden" name="amt" value="<? echo "$amt" ?>" />
-	<input type="hidden" name="currency" value="<? echo "$currency" ?>" />
-	<input type="hidden" name="cardtype" value="<? echo "$cardtype" ?>" />
-	<input type="hidden" name="locale" value="<? echo "$locale" ?>" />
-	<input type="hidden" name="returnurl" value="<? echo "$returnurl" ?>" />
-	<input type="hidden" name="notifyurl" value="<? echo "$notifyurl" ?>" />
-	<input type="hidden" name="customizeddata" value="<? echo "$customizeddata" ?>" />
-	<input type="hidden" name="extrafield1" value="<? echo "$extrafield1" ?>" />
-	<input type="hidden" name="extrafield2" value="<? echo "$extrafield2" ?>" />
-	<input type="hidden" name="extrafield3" value="<? echo "$extrafield3" ?>" />
-	<input type="hidden" name="salt" value="<? echo "$salt" ?>" />
-	<input type="hidden" name="hash" value="<? echo "$hash" ?>" />
-	<input type="submit" value="Submit" />
+<body onload="javascript:document.pay_form.submit();">
+<form id="pay_form" name="pay_form" method="post" action="{$gateway}">
+	<input type="hidden" name="merchantid" value="{$merchantid}" />
+	<input type="hidden" name="merchant_tid" value="{$merchant_tid}" />
+	<input type="hidden" name="ordernum" value="{$ordernum}" />
+	<input type="hidden" name="datetime" value="{$datetime}" />
+	<input type="hidden" name="amt" value="{$amt}" />
+	<input type="hidden" name="currency" value="{$currency}" />
+	<input type="hidden" name="cardtype" value="{$cardtype}" />
+	<input type="hidden" name="locale" value="{$locale}" />
+	<input type="hidden" name="returnurl" value="{$returnurl}" />
+	<input type="hidden" name="notifyurl" value="{$notifyurl}" />
+	<input type="hidden" name="customizeddata" value="{$customizeddata}" />
+	<input type="hidden" name="extrafield1" value="{$extrafield1}" />
+	<input type="hidden" name="extrafield2" value="{$extrafield2}" />
+	<input type="hidden" name="extrafield3" value="{$extrafield3}" />
+	<input type="hidden" name="salt" value="{$salt}" />
+	<input type="hidden" name="hash" value="{$hash}" />
 </form>
-
-<script type="text/javascript">
-	document.form1.submit();
-</script>
 </body>
 </html>
 eot;

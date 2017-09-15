@@ -106,15 +106,15 @@ class MobiGateway extends AbstractGateway
     }
 
 
-    public function setCustomizeddate($value)
+    public function setCustomizeddata($value)
     {
-        return $this->setParameter('customizeddate', $value);
+        return $this->setParameter('customizeddata', $value);
     }
 
 
-    public function getCustomizeddate()
+    public function getCustomizeddata()
     {
-        return $this->getParameter('customizeddate');
+        return $this->getParameter('customizeddata');
     }
 
 

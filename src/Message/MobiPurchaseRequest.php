@@ -41,7 +41,7 @@ class MobiPurchaseRequest extends AbstractMobiRequest
             //货币
             'currency'       => $this->getCurrency(),
             //订单备注
-            'customizeddata' => $this->getCustomizeddate(),
+            'customizeddata' => $this->getCustomizeddata(),
             //语言
             'locale'         => $this->getLocale(),
             //callback地址
@@ -83,6 +83,6 @@ class MobiPurchaseRequest extends AbstractMobiRequest
      */
     public function sendData($data)
     {
-        return $this->response = new MobiPurchaseResponse($this, (array)json_decode($data));
+        return $this->response = new MobiPurchaseResponse($this, $data);
     }
 }
