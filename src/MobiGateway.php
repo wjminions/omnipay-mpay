@@ -190,6 +190,42 @@ class MobiGateway extends AbstractGateway
     }
 
 
+    public function setRefundOrdernum($value)
+    {
+        return $this->setParameter('refund_ordernum', $value);
+    }
+
+
+    public function getRefundOrdernum()
+    {
+        return $this->getParameter('refund_ordernum');
+    }
+
+
+    public function setRefundAmt($value)
+    {
+        return $this->setParameter('refund_amt', $value);
+    }
+
+
+    public function getRefundAmt()
+    {
+        return $this->getParameter('refund_amt');
+    }
+
+
+    public function setRef($value)
+    {
+        return $this->setParameter('ref', $value);
+    }
+
+
+    public function getRef()
+    {
+        return $this->getParameter('ref');
+    }
+
+
     public function purchase(array $parameters = array())
     {
         return $this->createRequest('\Omnipay\Mpay\Message\MobiPurchaseRequest', $parameters);

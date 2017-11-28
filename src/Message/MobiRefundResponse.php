@@ -10,9 +10,42 @@ use Omnipay\Common\Message\AbstractResponse;
  */
 class MobiRefundResponse extends AbstractResponse
 {
+    public function isRedirect()
+    {
+        return false;
+    }
+
+
+    public function getRedirectMethod()
+    {
+        return 'POST';
+    }
+
+
+    public function getRedirectUrl()
+    {
+        return false;
+    }
+
+
+    public function getRedirectHtml()
+    {
+        return false;
+    }
+
+
+    public function getTransactionNo()
+    {
+        return isset($this->data['refnum']) ? $this->data['refnum'] : '';
+    }
+
 
     public function isPaid()
     {
+        if ($this->data['is_paid']) {
+            return true;
+        }
+
         return false;
     }
 
@@ -24,70 +57,16 @@ class MobiRefundResponse extends AbstractResponse
      */
     public function isSuccessful()
     {
+        if ($this->data['is_paid']) {
+            return true;
+        }
+
         return false;
     }
 
 
-    public function isRedirect()
-    {
-        return true;
-    }
-
-
-    public function getRedirectMethod()
-    {
-        return 'GET';
-    }
-
-
-    public function getRedirectUrl()
-    {
-        if (isset($this->data->failure_msg)) {
-            $pattern = "/https.+/";
-
-            preg_match($pattern, $this->data->failure_msg, $url);
-
-            $url = $url[0];
-        } else {
-            $url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
-        }
-
-        return $url;
-    }
-
-
-    public function getRedirectHtml()
-    {
-
-        if (isset($this->data->failure_msg)) {
-            $pattern = "/https.+/";
-
-            preg_match($pattern, $this->data->failure_msg, $url);
-
-            $url = $url[0];
-        } else {
-            $url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
-        }
-
-        $html = "<a href=" . $url . ">Click the jump to Alipay refund</a>";
-
-        return $html;
-    }
-
-
-    public function getTransactionNo()
-    {
-        return $this->data->id;
-    }
-
-
-    /**
-     * Is the response successful?
-     *
-     * @return boolean
-     */
     public function getMessage()
     {
-        return isset($this->data->failure_msg) ? $this->data->failure_msg : '';
+        return isset($this->data['remark']) ? $this->data['remark'] : '';
     }
 }

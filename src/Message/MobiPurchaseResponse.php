@@ -53,7 +53,7 @@ class MobiPurchaseResponse extends AbstractResponse implements RedirectResponseI
     {
 
         $data = $this->data;
-        
+
         $merchantid = $data["merchantid"];
         $merchant_tid = $data["merchant_tid"];
         $ordernum = $data["ordernum"];

@@ -13,17 +13,27 @@ abstract class AbstractMobiRequest extends AbstractRequest
 {
     protected $sandboxEndpoint = 'https://demo.mobiletech.com.hk/';
 
-    protected $productionEndpoint = 'https://demo.mobiletech.com.hk/';
+    protected $productionEndpoint = 'https://www.mobiletech.com.hk/';
 
     protected $methods = array (
         'pay' => '/MerchantPay.jsp',
+        'query' => 'MPayJWS/TxnEnquiry?wsdl',
+        'refund' => 'MPayJWS/TxnRefund?wsdl',
     );
 
     public function getEndpoint($type)
     {
         if ($this->getEnvironment() == 'production') {
+            if ($type != 'pay') {
+                return $this->productionEndpoint . $this->methods[$type];
+            }
+
             return $this->productionEndpoint . $this->getChannel() . $this->methods[$type];
         } else {
+            if ($type != 'pay') {
+                return $this->sandboxEndpoint . $this->methods[$type];
+            }
+
             return $this->sandboxEndpoint . $this->getChannel() . $this->methods[$type];
         }
     }
@@ -194,5 +204,41 @@ abstract class AbstractMobiRequest extends AbstractRequest
     public function getEnvironment()
     {
         return $this->getParameter('environment');
+    }
+
+
+    public function setRefundOrdernum($value)
+    {
+        return $this->setParameter('refund_ordernum', $value);
+    }
+
+
+    public function getRefundOrdernum()
+    {
+        return $this->getParameter('refund_ordernum');
+    }
+
+
+    public function setRefundAmt($value)
+    {
+        return $this->setParameter('refund_amt', $value);
+    }
+
+
+    public function getRefundAmt()
+    {
+        return $this->getParameter('refund_amt');
+    }
+
+
+    public function setRef($value)
+    {
+        return $this->setParameter('ref', $value);
+    }
+
+
+    public function getRef()
+    {
+        return $this->getParameter('ref');
     }
 }

@@ -7,11 +7,11 @@ use Omnipay\Mpay\Helper;
 
 /**
  * Class MobiRefundRequest
+ *
  * @package Omnipay\Mpay\Message
  */
 class MobiRefundRequest extends AbstractMobiRequest
 {
-
     /**
      * Get the raw data array for this message. The format of this varies from gateway to
      * gateway, but will usually be either an associative array, or a SimpleXMLElement.
@@ -20,66 +20,123 @@ class MobiRefundRequest extends AbstractMobiRequest
      */
     public function getData()
     {
-        $this->validate(
-            'amount',
-            'subject',
-            'app_key',
-            'ch_id'
-        );
+        $this->validateData();
 
-        $data = array (
-            //商户订单号
-            'order_no'        => $this->getOrderNo(),
-            //交易金额，单位分
-            'amount'         => $this->getAmount(),
-            //主题
-            'subject' => $this->getSubject(),
-            //内容
-            'body' => $this->getBody(),
-            //app_id
-            'app' => $this->getApp(),
-            //支付方式
-            'channel' => $this->getChannel(),
-            //callback地址
-            'callback' => $this->getCallback(),
-            //app_key
-            'app_key' => $this->getAppKey(),
-            //货币
-            'currency' => $this->getCurrency(),
-            //私钥地址
-            'private_key_path' => $this->getPrivateKeyPath(),
-            //交易id
-            'ch_id' => $this->getChId()
+        $data = array(
+            //商户ID
+            'merchantid'   => $this->getMerchantid(),
+            //商户终端ID
+            'merchant_tid' => $this->getMerchantTid(),
+            //商户支付订单号
+            'org_ordernum' => $this->getOrdernum(),
+            //商户退款订单号
+            'ordernum'     => $this->getRefundOrdernum(),
+            //Mpay支付订单号
+            'org_ref'      => $this->getRef(),
+            //支付类型
+            'cardtype'     => $this->getCardtype(),
+            //退款金额
+            'amount'       => $this->getRefundAmt(),
+            //哈希码
+            'securekey'    => $this->getSecurekey(),
+            //mpay查询网关
+            'gateway'      => $this->getEndpoint('refund')
         );
 
         return $data;
     }
 
+    private function validateData()
+    {
+        $this->validate(
+            'merchantid',
+            'merchant_tid',
+            'ordernum',
+            'refund_ordernum',
+            'ref',
+            'cardtype',
+            'refund_amt',
+            'securekey'
+        );
+    }
 
     /**
      * Send the request with specified data
      *
      * @param  mixed $data The data to send
-     *
      * @return ResponseInterface
      */
     public function sendData($data)
     {
-//        require dirname(__FILE__) . '/../../../../pingplusplus/mpay-php/init.php';
+        $salt = Helper::genSalt();
 
-        \Mpay\Mpay::setApiKey($data['app_key']);           // 设置 API Key
-        \Mpay\Mpay::setPrivateKeyPath($data['private_key_path']);   // 设置私钥
+        $delr = "|";
 
-        // 通过发起一次退款请求创建一个新的 refund 对象，只能对已经发生交易并且没有全额退款的 Mobi 对象发起退款
-        $ch = \Mpay\Mobi::retrieve($data['ch_id']);// Mobi 对象的 id
+        $requestMessage = $data['merchantid'] . $delr .
+            $data['merchant_tid'] . $delr .
+            $data['ordernum'] . $delr .
+            $data['org_ordernum'] . $delr .
+            $data['org_ref'] . $delr .
+            $data['cardtype'] . $delr .
+            $data['amount'];
 
-        $re = $ch->refunds->create(
-            array(
-                'amount' => $data['amount'],// 退款的金额, 单位为对应币种的最小货币单位，例如：人民币为分（如退款金额为 1 元，此处请填 100）。必须小于等于可退款金额，默认为全额退款
-                'description' => $data['subject']
-            )
-        );
+        $hash = Helper::genHashRequest($requestMessage, $salt, $data['securekey']);
 
-        return $this->response = new MobiRefundResponse($this, json_decode($re));
+        // soap请求
+        try {
+            $client = new \SoapClient($data['gateway'], array('encoding' => 'UTF-8'));
+            $client->__setLocation($data['gateway']);
+
+            $param = array(
+                'arg0' => $data['merchantid'],
+                'arg1' => $data['merchant_tid'],
+                'arg2' => $data['ordernum'],
+                'arg3' => $data['org_ordernum'],
+                'arg4' => $data['org_ref'],
+                'arg5' => $data['cardtype'],
+                'arg6' => $data['amount'],
+                'arg7' => $salt,
+                'arg8' => $hash
+            );
+
+            // 获取返回数据
+            $result = $client->__soapCall("performTxnRefund", array($param));
+        } catch (\SOAPFault $e) {
+            print $e;
+        }
+
+        $return = (array)$result->return;
+
+        $merchantid   = $result->return->merchantid;
+        $merchant_tid = $result->return->merchant_tid;
+        $ordernum     = $result->return->ordernum;
+        $refnum       = $result->return->refnum;
+        // 将amount从float转化为string格式
+        $amount       = (string) $result->return->amt;
+        $rspcode      = $result->return->rspcode;
+        $salt         = $result->return->salt;
+        $hash         = $result->return->hash;
+        $cardtype     = $result->return->cardtype;
+
+        // 将amount转化为100.0格式
+        if(strpos($amount, '.') === false){
+            $amount = (string)$amount;
+            $amount = $amount . ".0";
+        }
+
+        $responseMessage = $merchantid . $delr . $merchant_tid . $delr . $ordernum . $delr . $refnum . $delr . $amount . $delr . $rspcode;
+        $hashvalue       = Helper::genHashResponse($responseMessage, $salt, $data['securekey']);
+
+        $data['is_paid'] = false;
+        if (strcasecmp($hash, $hashvalue) == 0
+            && $rspcode === "100"
+            && $cardtype == $this->getCardtype()
+        ) {
+            $data['is_paid'] = true;
+        }
+
+        $data = array_merge($data, $return);
+
+        return $this->response = new MobiRefundResponse($this, $data);
     }
 }
