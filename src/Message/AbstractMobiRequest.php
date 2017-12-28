@@ -13,7 +13,7 @@ abstract class AbstractMobiRequest extends AbstractRequest
 {
     protected $sandboxEndpoint = 'https://demo.mobiletech.com.hk/';
 
-    protected $productionEndpoint = 'https://www.mobiletech.com.hk/';
+    protected $productionEndpoint = 'https://www.mpaymall.com/';
 
     protected $methods = array (
         'pay' => '/MerchantPay.jsp',
